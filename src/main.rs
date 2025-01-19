@@ -1,5 +1,5 @@
-use std::string;
 use std::fmt;
+use std::string;
 
 fn main() {
     let x = 5;
@@ -46,17 +46,34 @@ fn main() {
     };
     crabby.take_damage(100);
     crabby.take_damage(10);
-    println!("Crabby: {}, health: {}, state: {} ", crabby.name, crabby.health, crabby.state);
+    println!(
+        "Crabby: {}, health: {}, state: {} ",
+        crabby.name, crabby.health, crabby.state
+    );
 
     crabby.state_represent();
     crabby.heal(60);
-    println!("Crabby: {}, health: {}, state: {}", crabby.name, crabby.health, crabby.state);
+    println!(
+        "Crabby: {}, health: {}, state: {}",
+        crabby.name, crabby.health, crabby.state
+    );
     crabby.state_represent();
 
     crabby.collecting(15);
-    println!("Crabby: {}, health: {}, state: {}", crabby.name, crabby.health, crabby.state);
+    println!(
+        "Crabby: {}, health: {}, state: {}",
+        crabby.name, crabby.health, crabby.state
+    );
     crabby.state_represent();
 
+    // sample trait & generic
+    let gold= Inventory { item: 100 };
+    gold.display();
+
+    let armor = Inventory {
+        item: "Iron Armor".to_string(),
+    };
+    armor.display();
 }
 
 // Lifetimes in Rust ensure that references are valid for as long as needed.
@@ -100,7 +117,9 @@ impl Crabby {
         match self.state {
             CrabbyState::Resting => println!("Crabby is resting"),
             CrabbyState::Fighting => println!("Crabby is fighting"),
-            CrabbyState::Collecting(amount) => println!("Crabby is collecting {} treasures", amount),
+            CrabbyState::Collecting(amount) => {
+                println!("Crabby is collecting {} treasures", amount)
+            }
             CrabbyState::Defending => println!("Crabby is defending"),
         }
     }
@@ -110,7 +129,7 @@ enum CrabbyState {
     Resting,
     Fighting,
     Collecting(u32),
-    Defending
+    Defending,
 }
 
 impl fmt::Display for CrabbyState {
@@ -122,5 +141,22 @@ impl fmt::Display for CrabbyState {
             CrabbyState::Defending => write!(f, "Defending"),
         }
     }
+}
 
+struct Inventory<T> {
+    item: T,
+}
+
+trait DisplayItem {
+    fn display(&self);
+}
+
+// impl<Generic> Trait for Struct
+impl<T> DisplayItem for Inventory<T>
+where
+    T: fmt::Debug,
+{
+    fn display(&self) {
+        println!("Item: {:?}", self.item); // debug format
+    }
 }
