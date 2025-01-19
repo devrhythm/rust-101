@@ -22,4 +22,11 @@ fn main() {
     // let trusted_friend2 = &mut treasure; // cannot borrow `treasure` as mutable more than once at a time
     trusted_friend.push_str("Coins");
 
+
+    // sample lifetime
+    let treasure2; {
+        let local_treasure = String::from("Treasure2");
+        treasure2 = &local_treasure; // borrowed value does not live long enough
+    }
+    // println!("{}", treasure2);  // treasure 2 no longer valid because local_treasure is dropped
 }
