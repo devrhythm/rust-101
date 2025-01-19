@@ -1,3 +1,5 @@
+use std::string;
+
 fn main() {
     let x = 5;
     let x2: i32 = 5;
@@ -29,4 +31,19 @@ fn main() {
         treasure2 = &local_treasure; // borrowed value does not live long enough
     }
     // println!("{}", treasure2);  // treasure 2 no longer valid because local_treasure is dropped
+
+    let map1 = "Ancient map of the sea";
+    let map2 = "Map to hidden gold";
+
+    let chosen_map = longest_map(map1, map2);
+    println!("Crabby's longest map: {}", chosen_map);
+}
+
+// lifetime annotation '<name>, every reference has lifetime equal to the scope of the variable
+fn longest_map<'a>(map1: &'a str, map2: &'a str) -> &'a str {
+    if map1.len() > map2.len() {
+        map1
+    } else {
+        map2
+    }
 }
