@@ -2,27 +2,41 @@ use std::fmt;
 use std::string;
 
 fn main() {
-    let x = 5;
+    let x = 5; // inferred as i32
     let x2: i32 = 5;
-    let y = 0.5;
+    let y = 0.5; // inferred as f64
     let y2: f64 = 0.5;
 
     let z = x + y as i32;
 
-    let msg = String::from("Hello, world!");
+    let msg = String::from("Hello, world!"); // allocating memory on heap, use when need to modify string
     let msg2 = "Hello, world!".to_string();
-    let msg3 = "Hello, world!";
-    let msg4 = format!("{}, x:{}, y:{}, z:{}", "hello", x, y, z);
+    let msg3 = "Hello, world!"; // borrowed string, immutable, read-only
+    let msg4 = format!(
+        "{}, x:{}, x2:{}, y:{}, y2:{}, z:{}",
+        "hello", x, x2, y, y2, z
+    );
 
-    println!("{}", msg4);
+    println!("{} {} {} {}", msg, msg2, msg3, msg4);
 
     let mut treasure = String::from("Treasure");
     let friend1 = &treasure;
     let friend2 = &treasure; // can borrow immutable more than once
+    println!("friends: {} {}", friend1, friend2);
+
 
     let trusted_friend = &mut treasure;
     // let trusted_friend2 = &mut treasure; // cannot borrow `treasure` as mutable more than once at a time
     trusted_friend.push_str("Coins");
+    println!("trusted friend: {}", trusted_friend);
+
+    let map: String = String::from("Old map");
+    let borrowed_map:&str = map.as_str();
+    let mut crabby_map: String = borrowed_map.to_string();
+    crabby_map.push_str(" to hidden treasure");
+
+    println!("Crabby's map: {}", crabby_map);
+
 
     // sample lifetime
     let treasure2;
@@ -67,7 +81,7 @@ fn main() {
     crabby.state_represent();
 
     // sample trait & generic
-    let gold= Inventory { item: 100 };
+    let gold = Inventory { item: 100 };
     gold.display();
 
     let armor = Inventory {
