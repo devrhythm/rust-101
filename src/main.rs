@@ -12,4 +12,14 @@ fn main() {
     let msg4  = format!("{}, x:{}, y:{}, z:{}", "hello", x ,y, z);
 
     println!("{}", msg4);
+
+
+    let mut treasure = String::from("Treasure");
+    let friend1 = &treasure;
+    let friend2 = &treasure; // can borrow immutable more than once
+
+    let trusted_friend = &mut treasure;
+    // let trusted_friend2 = &mut treasure; // cannot borrow `treasure` as mutable more than once at a time
+    trusted_friend.push_str("Coins");
+
 }
