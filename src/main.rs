@@ -1,4 +1,5 @@
 use std::string;
+use std::fmt;
 
 fn main() {
     let x = 5;
@@ -37,17 +38,25 @@ fn main() {
     let chosen_map = longest_map(map1, map2);
     println!("Crabby's longest map: {}", chosen_map);
 
-    // sample struct
+    // sample struct & enum
     let mut crabby = Crabby {
         name: "Crabby".to_string(),
         health: 100,
+        state: CrabbyState::Resting,
     };
     crabby.take_damage(100);
     crabby.take_damage(10);
-    println!("Crabby: {}, health: {} ", crabby.name, crabby.health);
+    println!("Crabby: {}, health: {}, state: {} ", crabby.name, crabby.health, crabby.state);
 
+    crabby.state_represent();
     crabby.heal(60);
-    println!("Crabby: {}, health: {}", crabby.name, crabby.health);
+    println!("Crabby: {}, health: {}, state: {}", crabby.name, crabby.health, crabby.state);
+    crabby.state_represent();
+
+    crabby.collecting(15);
+    println!("Crabby: {}, health: {}, state: {}", crabby.name, crabby.health, crabby.state);
+    crabby.state_represent();
+
 }
 
 // Lifetimes in Rust ensure that references are valid for as long as needed.
@@ -65,11 +74,13 @@ fn longest_map<'a>(map1: &'a str, map2: &'a str) -> &'a str {
 struct Crabby {
     name: String,
     health: u8,
+    state: CrabbyState,
 }
 
 impl Crabby {
     fn take_damage(&mut self, damage: u8) {
         self.health = self.health.saturating_sub(damage);
+        self.state = CrabbyState::Fighting;
     }
 
     fn heal(&mut self, health: u8) {
@@ -78,5 +89,38 @@ impl Crabby {
         } else {
             self.health += health;
         }
+        self.state = CrabbyState::Resting;
     }
+
+    fn collecting(&mut self, amount: u32) {
+        self.state = CrabbyState::Collecting(amount);
+    }
+
+    fn state_represent(&self) {
+        match self.state {
+            CrabbyState::Resting => println!("Crabby is resting"),
+            CrabbyState::Fighting => println!("Crabby is fighting"),
+            CrabbyState::Collecting(amount) => println!("Crabby is collecting {} treasures", amount),
+            CrabbyState::Defending => println!("Crabby is defending"),
+        }
+    }
+}
+
+enum CrabbyState {
+    Resting,
+    Fighting,
+    Collecting(u32),
+    Defending
+}
+
+impl fmt::Display for CrabbyState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            CrabbyState::Resting => write!(f, "Resting"),
+            CrabbyState::Fighting => write!(f, "Fighting"),
+            CrabbyState::Collecting(amount) => write!(f, "Collecting {}", amount),
+            CrabbyState::Defending => write!(f, "Defending"),
+        }
+    }
+
 }
