@@ -1,5 +1,7 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
+use std::rc::Rc;
 use std::vec;
 
 fn main() {
@@ -13,6 +15,7 @@ fn main() {
     sample_iterators_and_closures();
     sample_hashmaps();
     sample_error_handling();
+    sample_smart_pointer();
 }
 
 fn sample_types() {
@@ -410,4 +413,87 @@ fn upgrade_weapon(weapon: &str, material_count: i32) -> Option<String> {
     } else {
         None
     }
+}
+
+fn sample_smart_pointer() {
+    // Box is a smart pointer that allocates memory on the heap
+    // Box is used to store data when the size is unknown at compile time
+    let root_tree_node = TreeNode {
+        name: "Root",
+        child: Some(Box::new(TreeNode {
+            name: "Child 1",
+            child: Some(Box::new(TreeNode {
+                name: "Child 2",
+                child: None,
+            })),
+        })),
+    };
+    println!("Root tree node: {:?}", root_tree_node);
+
+    // Note: normally rust 1 heap can point only 1 owner
+    let sword = String::from("Sword");
+    // let loot_1 = sword;
+    // let loot_2 = sword; // Ownership moved to loot_1, cannot use sword anymore
+
+    // let loot_1 = sword.clone(); // cause of memory performance
+    // let loot_2 = sword.clone();
+
+    // Rc is a reference-counted smart pointer that allows multiple owners
+    // Rc is used to share data between multiple parts of the program
+    // Rc is immutable, cannot modify the value it points to
+    let shared_loot = Rc::new(sword);
+
+    let loot_1 = Rc::clone(&shared_loot);
+    let loot_2 = Rc::clone(&shared_loot);
+    println!("Loot 1: {}", loot_1);
+    println!("Loot 2: {}", loot_2);
+
+    // RefCell is a smart pointer that allows mutable borrows checked at runtime
+    // RefCell is used to mutate data when the compiler cannot determine if it is mutable
+    // RefCell is used with Rc to allow multiple owners to mutate the data
+    // RefCell is used when the borrow checker prevents mutable borrows
+    let gold = Box::new(10);
+    let shared_gold_chest = Rc::new(RefCell::new(gold));
+    let gold_chest_1 = Rc::clone(&shared_gold_chest);
+    let gold_chest_2 = Rc::clone(&shared_gold_chest);
+
+    **gold_chest_1.borrow_mut() += 10;
+    **gold_chest_2.borrow_mut() += 20;
+
+    println!("Gold chest: {}", **shared_gold_chest.borrow());
+    // output: Gold chest: 40
+    println!("Gold chest 1: {}", **gold_chest_1.borrow());
+    // output: Gold chest 1: 40
+    println!("Gold chest 2: {}", **gold_chest_2.borrow());
+    // output: Gold chest 2: 40
+
+    let bag = 10;
+    let shared_bag = Rc::new(RefCell::new(bag));
+    let bag_1 = Rc::clone(&shared_bag);
+    let bag_2 = Rc::clone(&shared_bag);
+
+    *bag_1.borrow_mut() += 20;
+    *bag_2.borrow_mut() += 30;
+    *shared_bag.borrow_mut() += 40;
+
+    println!(
+        "Shared bag: {}, Bag 1: {}, Bag 2: {}",
+        shared_bag.borrow(),
+        bag_1.borrow(),
+        bag_2.borrow()
+    );
+}
+
+// Recursive type storing a reference to itself is not allowed
+// because rust cannot determine the size of the type at compile time
+// recursive type `TreeViewBranch` has infinite size
+// struct TreeViewBranch<'a> {
+//     name: String,
+//     child: Option<TreeViewBranch<'a>>,
+// }
+
+#[derive(Debug)]
+struct TreeNode<'a> {
+    name: &'a str,
+    child: Option<Box<TreeNode<'a>>>,
 }
