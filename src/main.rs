@@ -1,7 +1,6 @@
-use std::fmt;
-use std::string;
-use std::vec;
 use std::collections::HashMap;
+use std::fmt;
+use std::vec;
 
 fn main() {
     sample_types();
@@ -13,6 +12,7 @@ fn main() {
     sample_vector();
     sample_iterators_and_closures();
     sample_hashmaps();
+    sample_error_handling();
 }
 
 fn sample_types() {
@@ -51,7 +51,6 @@ fn sample_string() {
     crabby_map.push_str(" to hidden treasure");
 
     println!("Crabby's map: {}", crabby_map);
-
 }
 
 fn sample_lifetime() {
@@ -193,7 +192,11 @@ fn sample_vector() {
 }
 
 fn sample_iterators_and_closures() {
-    let quests = vec!["Find the treasure", "Defeat the dragon", "Save the princess"];
+    let quests = vec![
+        "Find the treasure",
+        "Defeat the dragon",
+        "Save the princess",
+    ];
 
     // closure is inline function
     let completed_quests: Vec<String> = quests
@@ -203,7 +206,7 @@ fn sample_iterators_and_closures() {
 
     println!("completed_quests: {:?}", completed_quests);
 
-    let add = |a,b| a + b;
+    let add = |a, b| a + b;
     let result = add(1, 2);
     println!("result: {}", result);
 }
@@ -226,7 +229,103 @@ fn sample_hashmaps() {
         *gold += 10;
     }
 
-   println!("inventory: {:?}", inventory);
+    println!("inventory: {:?}", inventory);
+}
+
+fn sample_error_handling() {
+    let items = vec!["Sword", "Shield", "Potion", "Gold"];
+
+    match items.get(4) {
+        Some(item) => println!("Item: {}", item),
+        None => println!("Item not found"),
+    }
+    // output: Item not found
+
+    let item = items.get(4).unwrap_or(&"unwrap_or: Item not found");
+    println!("Item: {}", item);
+    // output: Item: Item not found
+
+    let item2 = items.get(4).unwrap_or_else(|| &"unwrap_or_else: Item not found");
+    println!("Item: {}", item2);
+    // unwrap_or_else is used to provide a custom error message
+
+    // let item3 = items.get(4).unwrap(); // panicked called `Option::unwrap()` on a `None` value
+
+
+    let treasure = open_treasure("correct-key");
+    match treasure {
+        Ok(value) => println!("Chest 1: Success: {}", value),
+        Err(error) => println!("Chest 1: Error: {}", error),
+    }
+    // output: Treasure: You got 10$
+
+    let chest_result = match open_treasure("incorrect-key") {
+        Ok(message) => message,
+        Err(error) => error,
+        // Err(error) => panic!("Error: {}", error),
+        // panic! macro is used to stop the program and print an error message
+    };
+    println!("Chest 2 Result: {}", chest_result);
+    // output: Error: Treasure chest is locked
+
+    if let Ok(treasure) = open_treasure("correct-key") {
+        println!("Chest 3: Success: {}", treasure);
+    } else {
+        println!("Chest 3: Invalid key");
+    }
+
+    let _ = open_treasure_propagating_errors_with_question_mark("correct-key");
+    // output: Chest 4: You got 10$
+
+    let chest5_result = open_treasure_propagating_errors_with_question_mark("incorrect-key");
+    if let Err(error) = chest5_result {
+        println!("Chest 5: Error: {}", error);
+    }
+    // output: Error: Invalid key
+
+    let upgrade_weapon_result = match upgrade_weapon("Sword", 10) {
+        Some(message) => message,
+        None => "Not enough materials".to_string(),
+    };
+
+    println!("Upgrade weapon 1: {}", upgrade_weapon_result);
+    // output: Upgrade weapon: sword upgraded successfully
+
+    let upgrade_weapon_result = match upgrade_weapon("Bow", 5) {
+        Some(message) => message,
+        None => "Not enough materials".to_string(),
+    };
+    println!("Upgrade weapon 2: {}", upgrade_weapon_result);
+
+
+}
+
+fn open_treasure(key: &str) -> Result<String, String> {
+    if key == "correct-key" {
+        Ok("You got 10$".to_string())
+    } else {
+        Err("Invalid key".to_string())
+    }
+}
+
+fn open_treasure_propagating_errors_with_question_mark(key: &str) -> Result<(), String> {
+    // ? operator is used to propagate errors
+    // It can only be used in functions that return Result or Option
+    // It returns the value inside Ok or stops the function and returns the error inside Err
+    let chest_result = open_treasure(key)?;
+
+    println!("Chest 4: {}", chest_result);
+
+    // () is unit type, used when the function does not return a value
+    Ok(())
+}
+
+fn upgrade_weapon(weapon: &str, material_count: i32) -> Option<String> {
+    if material_count >= 10 {
+       Some(format!("{} upgraded successfully", weapon))
+    } else {
+        None
+    }
 }
 
 // ** function, structm enum, trait, and impl **
