@@ -1,5 +1,6 @@
 use std::fmt;
 use std::string;
+use std::vec;
 
 fn main() {
     sample_types();
@@ -9,6 +10,7 @@ fn main() {
     sample_threat_and_generic();
     sample_loop();
     sample_vector();
+    sample_iterators_and_closures();
 }
 
 fn sample_types() {
@@ -188,6 +190,21 @@ fn sample_vector() {
     // weapons_count: 5, weapons_capacity: 8 // capacity doubled when reached
 }
 
+fn sample_iterators_and_closures() {
+    let quests = vec!["Find the treasure", "Defeat the dragon", "Save the princess"];
+
+    // closure is inline function
+    let completed_quests: Vec<String> = quests
+        .iter()
+        .map(|quest| format!("Completed: {}", quest))
+        .collect();
+
+    println!("completed_quests: {:?}", completed_quests);
+
+    let add = |a,b| a + b;
+    let result = add(1, 2);
+    println!("result: {}", result);
+}
 
 // ** function, structm enum, trait, and impl **
 
