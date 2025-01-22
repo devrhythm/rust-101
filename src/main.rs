@@ -125,6 +125,40 @@ fn main() {
     for number in 1..=5 {
         println!("Number: {}", number);
     }
+
+
+    // Sample vector
+    let mut skills: Vec<String> = Vec::new();
+
+    skills.push("Stun".to_string());
+    skills.push("Heal".to_string());
+
+    // .iter() returns an iterator over the vector, borrowing each element
+    // .into_iter() returns an iterator that takes ownership of the vector
+    // .iter_mut() returns an iterator that allows modifying each element
+    // .drain() returns an iterator that removes and yields each element
+    // .remove() removes and returns the element at the specified index
+    for skill in skills.iter() {
+        println!("Skill: {}", skill);
+    }
+
+    let mut weapons: Vec<&str> = vec!["Sword", "Shield", "Staff", "Bow"];
+    let last_weapon = weapons.pop();
+    let second_weapon = weapons.remove(1);
+    let weapons_count = weapons.len();
+    let weapons_capacity = weapons.capacity();
+
+    println!("last_weapon: {:?}, second_weapon: {:?}, weapons_count: {}, weapons_capacity: {}", last_weapon, second_weapon, weapons_count, weapons_capacity);
+    // last_weapon: Some("Bow"), second_weapon: "Shield", weapons_count: 2, weapons_capacity: 4
+
+    println!("weapons: {:?}", weapons);
+    // weapons: ["Sword", "Staff"]
+
+    weapons.push("Dagger");
+    weapons.push("Axe");
+    weapons.push("Knuckles");
+    println!("weapons_count: {}, weapons_capacity: {}", weapons.len(), weapons.capacity());
+    // weapons_count: 5, weapons_capacity: 8 // capacity doubled when reached
 }
 
 // Lifetimes in Rust ensure that references are valid for as long as needed.
