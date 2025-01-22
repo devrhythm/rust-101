@@ -69,6 +69,18 @@ fn sample_lifetime() {
     println!("Crabby's longest map: {}", chosen_map);
 }
 
+// Lifetimes in Rust ensure that references are valid for as long as needed.
+// They prevent dangling references and memory safety issues by specifying
+// how long references should be valid. Lifetimes are denoted using an
+// apostrophe followed by a name ('<lifetime-name>),  like 'a.
+fn longest_map<'a>(map1: &'a str, map2: &'a str) -> &'a str {
+    if map1.len() > map2.len() {
+        map1
+    } else {
+        map2
+    }
+}
+
 fn sample_struct_and_enum() {
     // sample struct & enum
     let mut crabby = Crabby {
@@ -99,6 +111,61 @@ fn sample_struct_and_enum() {
     crabby.state_represent();
 }
 
+struct Crabby {
+    name: String,
+    health: u8,
+    state: CrabbyState,
+}
+
+impl Crabby {
+    fn take_damage(&mut self, damage: u8) {
+        self.health = self.health.saturating_sub(damage);
+        self.state = CrabbyState::Fighting;
+    }
+
+    fn heal(&mut self, health: u8) {
+        if self.health + health >= 100 {
+            self.health = 100;
+        } else {
+            self.health += health;
+        }
+        self.state = CrabbyState::Resting;
+    }
+
+    fn collecting(&mut self, amount: u32) {
+        self.state = CrabbyState::Collecting(amount);
+    }
+
+    fn state_represent(&self) {
+        match self.state {
+            CrabbyState::Resting => println!("Crabby is resting"),
+            CrabbyState::Fighting => println!("Crabby is fighting"),
+            CrabbyState::Collecting(amount) => {
+                println!("Crabby is collecting {} treasures", amount)
+            }
+            CrabbyState::Defending => println!("Crabby is defending"),
+        }
+    }
+}
+
+enum CrabbyState {
+    Resting,
+    Fighting,
+    Collecting(u32),
+    Defending,
+}
+
+impl fmt::Display for CrabbyState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            CrabbyState::Resting => write!(f, "Resting"),
+            CrabbyState::Fighting => write!(f, "Fighting"),
+            CrabbyState::Collecting(amount) => write!(f, "Collecting {}", amount),
+            CrabbyState::Defending => write!(f, "Defending"),
+        }
+    }
+}
+
 fn sample_threat_and_generic() {
     // sample trait & generic
     let gold = Inventory { item: 100 };
@@ -108,6 +175,24 @@ fn sample_threat_and_generic() {
         item: "Iron Armor".to_string(),
     };
     armor.display();
+}
+
+struct Inventory<T> {
+    item: T,
+}
+
+trait DisplayItem {
+    fn display(&self);
+}
+
+// impl<Generic> Trait for Struct
+impl<T> DisplayItem for Inventory<T>
+where
+    T: fmt::Debug,
+{
+    fn display(&self) {
+        println!("Item: {:?}", self.item); // debug format
+    }
 }
 
 fn sample_loop() {
@@ -245,12 +330,13 @@ fn sample_error_handling() {
     println!("Item: {}", item);
     // output: Item: Item not found
 
-    let item2 = items.get(4).unwrap_or_else(|| &"unwrap_or_else: Item not found");
+    let item2 = items
+        .get(4)
+        .unwrap_or_else(|| &"unwrap_or_else: Item not found");
     println!("Item: {}", item2);
     // unwrap_or_else is used to provide a custom error message
 
     // let item3 = items.get(4).unwrap(); // panicked called `Option::unwrap()` on a `None` value
-
 
     let treasure = open_treasure("correct-key");
     match treasure {
@@ -296,8 +382,6 @@ fn sample_error_handling() {
         None => "Not enough materials".to_string(),
     };
     println!("Upgrade weapon 2: {}", upgrade_weapon_result);
-
-
 }
 
 fn open_treasure(key: &str) -> Result<String, String> {
@@ -322,95 +406,8 @@ fn open_treasure_propagating_errors_with_question_mark(key: &str) -> Result<(), 
 
 fn upgrade_weapon(weapon: &str, material_count: i32) -> Option<String> {
     if material_count >= 10 {
-       Some(format!("{} upgraded successfully", weapon))
+        Some(format!("{} upgraded successfully", weapon))
     } else {
         None
-    }
-}
-
-// ** function, structm enum, trait, and impl **
-
-// Lifetimes in Rust ensure that references are valid for as long as needed.
-// They prevent dangling references and memory safety issues by specifying
-// how long references should be valid. Lifetimes are denoted using an
-// apostrophe followed by a name ('<lifetime-name>),  like 'a.
-fn longest_map<'a>(map1: &'a str, map2: &'a str) -> &'a str {
-    if map1.len() > map2.len() {
-        map1
-    } else {
-        map2
-    }
-}
-
-struct Crabby {
-    name: String,
-    health: u8,
-    state: CrabbyState,
-}
-
-impl Crabby {
-    fn take_damage(&mut self, damage: u8) {
-        self.health = self.health.saturating_sub(damage);
-        self.state = CrabbyState::Fighting;
-    }
-
-    fn heal(&mut self, health: u8) {
-        if self.health + health >= 100 {
-            self.health = 100;
-        } else {
-            self.health += health;
-        }
-        self.state = CrabbyState::Resting;
-    }
-
-    fn collecting(&mut self, amount: u32) {
-        self.state = CrabbyState::Collecting(amount);
-    }
-
-    fn state_represent(&self) {
-        match self.state {
-            CrabbyState::Resting => println!("Crabby is resting"),
-            CrabbyState::Fighting => println!("Crabby is fighting"),
-            CrabbyState::Collecting(amount) => {
-                println!("Crabby is collecting {} treasures", amount)
-            }
-            CrabbyState::Defending => println!("Crabby is defending"),
-        }
-    }
-}
-
-enum CrabbyState {
-    Resting,
-    Fighting,
-    Collecting(u32),
-    Defending,
-}
-
-impl fmt::Display for CrabbyState {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            CrabbyState::Resting => write!(f, "Resting"),
-            CrabbyState::Fighting => write!(f, "Fighting"),
-            CrabbyState::Collecting(amount) => write!(f, "Collecting {}", amount),
-            CrabbyState::Defending => write!(f, "Defending"),
-        }
-    }
-}
-
-struct Inventory<T> {
-    item: T,
-}
-
-trait DisplayItem {
-    fn display(&self);
-}
-
-// impl<Generic> Trait for Struct
-impl<T> DisplayItem for Inventory<T>
-where
-    T: fmt::Debug,
-{
-    fn display(&self) {
-        println!("Item: {:?}", self.item); // debug format
     }
 }
