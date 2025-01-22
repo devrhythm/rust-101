@@ -2,6 +2,16 @@ use std::fmt;
 use std::string;
 
 fn main() {
+    sample_types();
+    sample_string();
+    sample_lifetime();
+    sample_struct_and_enum();
+    sample_threat_and_generic();
+    sample_loop();
+    sample_vector();
+}
+
+fn sample_types() {
     let x = 5; // inferred as i32
     let x2: i32 = 5;
     let y = 0.5; // inferred as f64
@@ -18,12 +28,13 @@ fn main() {
     );
 
     println!("{} {} {} {}", msg, msg2, msg3, msg4);
+}
 
+fn sample_string() {
     let mut treasure = String::from("Treasure");
     let friend1 = &treasure;
     let friend2 = &treasure; // can borrow immutable more than once
     println!("friends: {} {}", friend1, friend2);
-
 
     let trusted_friend = &mut treasure;
     // let trusted_friend2 = &mut treasure; // cannot borrow `treasure` as mutable more than once at a time
@@ -31,13 +42,15 @@ fn main() {
     println!("trusted friend: {}", trusted_friend);
 
     let map: String = String::from("Old map");
-    let borrowed_map:&str = map.as_str();
+    let borrowed_map: &str = map.as_str();
     let mut crabby_map: String = borrowed_map.to_string();
     crabby_map.push_str(" to hidden treasure");
 
     println!("Crabby's map: {}", crabby_map);
 
+}
 
+fn sample_lifetime() {
     // sample lifetime
     let treasure2;
     {
@@ -51,7 +64,9 @@ fn main() {
 
     let chosen_map = longest_map(map1, map2);
     println!("Crabby's longest map: {}", chosen_map);
+}
 
+fn sample_struct_and_enum() {
     // sample struct & enum
     let mut crabby = Crabby {
         name: "Crabby".to_string(),
@@ -79,7 +94,9 @@ fn main() {
         crabby.name, crabby.health, crabby.state
     );
     crabby.state_represent();
+}
 
+fn sample_threat_and_generic() {
     // sample trait & generic
     let gold = Inventory { item: 100 };
     gold.display();
@@ -88,7 +105,9 @@ fn main() {
         item: "Iron Armor".to_string(),
     };
     armor.display();
+}
 
+fn sample_loop() {
     // Sample Loop
     let mut gold_collected = 0;
     loop {
@@ -125,8 +144,9 @@ fn main() {
     for number in 1..=5 {
         println!("Number: {}", number);
     }
+}
 
-
+fn sample_vector() {
     // Sample vector
     let mut skills: Vec<String> = Vec::new();
 
@@ -148,7 +168,10 @@ fn main() {
     let weapons_count = weapons.len();
     let weapons_capacity = weapons.capacity();
 
-    println!("last_weapon: {:?}, second_weapon: {:?}, weapons_count: {}, weapons_capacity: {}", last_weapon, second_weapon, weapons_count, weapons_capacity);
+    println!(
+        "last_weapon: {:?}, second_weapon: {:?}, weapons_count: {}, weapons_capacity: {}",
+        last_weapon, second_weapon, weapons_count, weapons_capacity
+    );
     // last_weapon: Some("Bow"), second_weapon: "Shield", weapons_count: 2, weapons_capacity: 4
 
     println!("weapons: {:?}", weapons);
@@ -157,9 +180,16 @@ fn main() {
     weapons.push("Dagger");
     weapons.push("Axe");
     weapons.push("Knuckles");
-    println!("weapons_count: {}, weapons_capacity: {}", weapons.len(), weapons.capacity());
+    println!(
+        "weapons_count: {}, weapons_capacity: {}",
+        weapons.len(),
+        weapons.capacity()
+    );
     // weapons_count: 5, weapons_capacity: 8 // capacity doubled when reached
 }
+
+
+// ** function, structm enum, trait, and impl **
 
 // Lifetimes in Rust ensure that references are valid for as long as needed.
 // They prevent dangling references and memory safety issues by specifying
