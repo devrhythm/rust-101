@@ -88,6 +88,43 @@ fn main() {
         item: "Iron Armor".to_string(),
     };
     armor.display();
+
+    // Sample Loop
+    let mut gold_collected = 0;
+    loop {
+        gold_collected += 1;
+        println!("Gold collected: {}", gold_collected);
+
+        if gold_collected >= 5 {
+            break;
+        }
+    }
+
+    let mut energy = 10;
+
+    while energy > 0 {
+        println!("Energy: {}", energy);
+        energy -= 1;
+    }
+    println!("Out of energy");
+
+    let items = ["Sword", "Shield", "Potion", "Gold"];
+
+    for item in items.iter() {
+        if item == &"Potion" {
+            continue;
+        }
+
+        println!("Item: {}", item);
+    }
+
+    for number in (1..4).rev() {
+        println!("Number: {}", number);
+    }
+
+    for number in 1..=5 {
+        println!("Number: {}", number);
+    }
 }
 
 // Lifetimes in Rust ensure that references are valid for as long as needed.
