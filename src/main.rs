@@ -1,6 +1,7 @@
 use std::fmt;
 use std::string;
 use std::vec;
+use std::collections::HashMap;
 
 fn main() {
     sample_types();
@@ -11,6 +12,7 @@ fn main() {
     sample_loop();
     sample_vector();
     sample_iterators_and_closures();
+    sample_hashmaps();
 }
 
 fn sample_types() {
@@ -204,6 +206,27 @@ fn sample_iterators_and_closures() {
     let add = |a,b| a + b;
     let result = add(1, 2);
     println!("result: {}", result);
+}
+
+fn sample_hashmaps() {
+    let mut inventory: HashMap<&str, i32> = HashMap::new();
+
+    inventory.insert("Gold", 100);
+    inventory.insert("Sword", 1);
+    inventory.insert("Shield", 1);
+
+    let gold = inventory.get("Gold");
+    let sword = inventory.get("Sword");
+
+    println!("gold: {:?}, sword: {:?}", gold, sword);
+
+    if let Some(gold) = inventory.get_mut("Gold") {
+        // Dereference operator (*) is used to access the value that the reference points to
+        // Using dereference operator to modify the value in the HashMap
+        *gold += 10;
+    }
+
+   println!("inventory: {:?}", inventory);
 }
 
 // ** function, structm enum, trait, and impl **
