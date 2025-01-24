@@ -16,6 +16,7 @@ fn main() {
     sample_hashmaps();
     sample_error_handling();
     sample_smart_pointer();
+    sample_traits_as_a_type();
 }
 
 fn sample_types() {
@@ -496,4 +497,111 @@ fn sample_smart_pointer() {
 struct TreeNode<'a> {
     name: &'a str,
     child: Option<Box<TreeNode<'a>>>,
+}
+
+// Note:
+// use dynamic dispatch for flexibility
+// use static dispatch for speed
+fn sample_traits_as_a_type() {
+    let weapon = get_weapon("sword");
+    println!("weapon: {:?}", weapon);
+    weapon_attack(weapon);
+    // output: Attack by sword"
+
+    let bow = Bow;
+    generic_weapon_attack(bow);
+    // output: Attack by bow
+    let sword = Sword;
+    generic_weapon_attack(sword);
+    // output: Attach by sword
+
+    let shield = get_shield();
+    borrow_shield_block(&shield);
+    // output: Defend by wood shield
+    shield_block(shield);
+    // output: Defend by wood shield
+}
+
+trait Weapon: fmt::Debug {
+    fn attack(&self);
+}
+
+#[derive(Debug)]
+struct Sword;
+
+#[derive(Debug)]
+struct Bow;
+
+impl Weapon for Sword {
+    fn attack(&self) {
+        println!("Attack by sword");
+    }
+}
+
+impl Weapon for Bow {
+    fn attack(&self) {
+        println!("Attack by bow");
+    }
+}
+
+// Rust cannot return a trait object directly,
+// it must be wrapped in a smart pointer like Box,
+// because rust can not estimate memory size
+// fn get_weapon(weapon_type: &str) -> Weapon {
+//     match weapon_type {
+//         "sword" => Box::new(Sword),
+//         "bow" => Box::new(Bow),
+//         _ => panic!("Unknow weapon type!"),
+//     }
+// }
+
+// The dyn keyword in Rust is used to indicate that a type is a trait object.
+// Trait objects allow for dynamic dispatch,
+// which means that the method to be called is determined at runtime rather than compile time.
+// This is useful when you want to store different types that implement the same trait in a single collection
+// or pass them around as function arguments.
+// the dyn keyword can be used with other smart pointers like Rc, Arc, or even directly with references.
+// e.g. -> Rc<dyn Weapon> || -> &'a dyn Weapon
+// However, Box is commonly used because it allows for heap allocation and ownership transfer,
+// which is often needed when working with trait objects
+fn get_weapon(weapon_type: &str) -> Box<dyn Weapon> {
+    match weapon_type {
+        "sword" => Box::new(Sword),
+        "bow" => Box::new(Bow),
+        _ => panic!("Unknow weapon type!"),
+    }
+}
+
+// overhead heat memory
+fn weapon_attack(weapon: Box<dyn Weapon>) {
+    weapon.attack();
+}
+
+// safe more than dynamic dispatch
+fn generic_weapon_attack<T: Weapon> (weapon: T) {
+    weapon.attack();
+}
+
+trait Shield {
+    fn block(&self);
+}
+
+struct WoodShield;
+
+impl Shield for WoodShield {
+    fn block(&self) {
+        println!("Defend by wood shield");
+    }
+}
+
+fn get_shield() -> impl Shield {
+   WoodShield
+}
+
+fn shield_block(shield: impl Shield) {
+    shield.block();
+}
+
+fn borrow_shield_block(shield: &impl Shield) {
+    shield.block();
 }
