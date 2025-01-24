@@ -1,8 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt;
+use std::{fmt, thread};
 use std::rc::Rc;
 use std::vec;
+use std::sync::{mpsc, Arc, Mutex};
 
 fn main() {
     sample_types();
@@ -17,6 +18,9 @@ fn main() {
     sample_error_handling();
     sample_smart_pointer();
     sample_traits_as_a_type();
+    sample_multi_threading();
+    sample_share_data_between_threads();
+    sample_update_share_data_in_threads();
 }
 
 fn sample_types() {
@@ -604,4 +608,98 @@ fn shield_block(shield: impl Shield) {
 
 fn borrow_shield_block(shield: &impl Shield) {
     shield.block();
+}
+
+// NOTE: Rust threads, the built-in implementation is 1 Rust Thread :1 Thread in OS
+fn sample_multi_threading() {
+    let sub_thread = thread::spawn(|| {
+        println!("Message from sub_thread")
+    });
+
+    println!("Message from main thread");
+
+    sub_thread.join().unwrap();
+    // output: Message from main thread printed first, then Message from sub_thread come after
+}
+
+fn sample_share_data_between_threads() {
+    let treasure = Arc::new("Fashion Sword");
+
+    let thread_1 = thread::spawn({
+        let treasure_clone = Arc::clone(&treasure);
+
+        // move
+        // Ensure Consistency: Moving a value guarantees
+        //     that you can't mistakenly use data
+        //     after it's been transferred else where
+        // Prevent Data Races: Only one owner can modify the data at time
+        move || {
+            println!("1 Found: {}", treasure_clone);
+        }
+    });
+
+    let thread_2 = thread::spawn({
+        let treasure_clone = Arc::clone(&treasure);
+        move || {
+            println!("2 Found: {}", treasure_clone);
+        }
+    });
+
+    thread_1.join().unwrap();
+    thread_2.join().unwrap();
+    // output: 1 Found: Fashion Sword
+    // output: 2 Found: Fashion Sword
+}
+
+
+fn sample_update_share_data_in_threads() {
+    // Note:
+    // use std::sync::Mutex;
+    // Mutex (short for mutual exclusion) is a synchronization primitive that provides mutual exclusion
+    // allowing only one thread to access the data at a time.
+    // It is used to protect shared data from being accessed by multiple threads simultaneously,
+    // which can lead to data races and undefined behavior
+
+    // Note:
+    // Arc stands for Atomic Reference Counting.
+    // It is a thread-safe reference-counting pointer
+    // that enables multiple ownership of data.
+    // Arc is used when you need to share data between multiple threads
+    // and ensure that the data is not deallocated until all references to it are gone.
+    let cash = Arc::new(Mutex::new(100));
+    let mut handles = vec![];
+
+    for _ in 0..10 {
+        let cash = Arc::clone(&cash);
+        let handle = thread::spawn(move || {
+            let thread_id = thread::current(). id();
+            let mut store_cash = cash.lock().unwrap();
+            *store_cash += 10;
+
+            println!("Thread ID: {:?}, Cash: {}", thread_id, *store_cash);
+        });
+        handles.push(handle);
+    }
+
+    println!("Total Cash: {}", *cash.lock().unwrap());
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    let cash_result = cash.lock().unwrap();
+    println!("Total Cash: {}", *cash_result);
+    // output:
+    // Thread ID: ThreadId(5), Cash: 110
+    // Total Cash: 110 -> print order randomly
+    // Thread ID: ThreadId(6), Cash: 120
+    // Thread ID: ThreadId(7), Cash: 130
+    // Thread ID: ThreadId(8), Cash: 140
+    // Thread ID: ThreadId(9), Cash: 150
+    // Thread ID: ThreadId(10), Cash: 160
+    // Thread ID: ThreadId(11), Cash: 170
+    // Thread ID: ThreadId(12), Cash: 180
+    // Thread ID: ThreadId(14), Cash: 190
+    // Thread ID: ThreadId(13), Cash: 200
+    // Total Cash: 200
 }
