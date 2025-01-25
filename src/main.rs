@@ -8,6 +8,9 @@ use std::thread::ThreadId;
 use std::vec;
 use std::{fmt, thread};
 
+use potions::drop_item;
+
+
 fn main() {
     sample_types();
     sample_string();
@@ -27,6 +30,7 @@ fn main() {
     sample_channels_for_thread_with_buffer_size();
     sample_channels_for_thread_without_buffer_size();
     sample_channels_for_thread_with_update_shared_data();
+    sample_modules_and_crates();
 }
 
 fn sample_types() {
@@ -864,4 +868,33 @@ fn sample_channels_for_thread_with_update_shared_data() {
     // Received from thread_id: ThreadId(41), loot_gold: 90
     // All senders have been dropped
     // gold: 650
+}
+
+fn sample_modules_and_crates() {
+    potions::use_item();
+    weapons::use_item();
+    maps::use_item();
+    drop_item();
+}
+
+mod potions {
+    pub fn use_item() {
+        println!("Use a potion");
+    }
+
+    pub fn drop_item() {
+        println!("Drop a potion");
+    }
+}
+
+mod weapons {
+    pub fn use_item() {
+        println!("Use a weapon");
+    }
+}
+
+mod maps {
+    pub fn use_item() {
+        println!("Use a map");
+    }
 }
