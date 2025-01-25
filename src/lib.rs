@@ -9,3 +9,6 @@ pub mod potions {
 }
 
 pub mod weapons;
+pub mod armors;
+pub mod shields;
+pub mod pets;

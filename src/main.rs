@@ -8,9 +8,15 @@ use std::thread::ThreadId;
 use std::vec;
 use std::{fmt, thread};
 
-use rust_101::{potions, weapons};
+use rust_101::armors::use_item::use_item;
+use rust_101::pets::dogs::dog;
 use rust_101::potions::drop_item;
+use rust_101::{potions, weapons};
+// the name `use_item` is defined multiple times
+// `use_item` must be defined only once in the type namespace of this module
+// use rust_101::shields::use_item::use_item;
 
+use rust_101::shields::use_item;
 
 fn main() {
     sample_types();
@@ -876,8 +882,10 @@ fn sample_modules_and_crates() {
     weapons::use_item();
     maps::use_item();
     drop_item();
+    use_item();
+    use_item::use_item();
+    dog::bark();
 }
-
 
 mod maps {
     pub fn use_item() {
