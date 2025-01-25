@@ -1,9 +1,12 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::{fmt, thread};
+use std::ops::Bound;
 use std::rc::Rc;
-use std::vec;
+use std::sync::mpsc::SyncSender;
 use std::sync::{mpsc, Arc, Mutex};
+use std::thread::ThreadId;
+use std::vec;
+use std::{fmt, thread};
 
 fn main() {
     sample_types();
@@ -21,6 +24,9 @@ fn main() {
     sample_multi_threading();
     sample_share_data_between_threads();
     sample_update_share_data_in_threads();
+    sample_channels_for_thread_with_buffer_size();
+    sample_channels_for_thread_without_buffer_size();
+    sample_channels_for_thread_with_update_shared_data();
 }
 
 fn sample_types() {
@@ -582,7 +588,7 @@ fn weapon_attack(weapon: Box<dyn Weapon>) {
 }
 
 // safe more than dynamic dispatch
-fn generic_weapon_attack<T: Weapon> (weapon: T) {
+fn generic_weapon_attack<T: Weapon>(weapon: T) {
     weapon.attack();
 }
 
@@ -599,7 +605,7 @@ impl Shield for WoodShield {
 }
 
 fn get_shield() -> impl Shield {
-   WoodShield
+    WoodShield
 }
 
 fn shield_block(shield: impl Shield) {
@@ -612,9 +618,7 @@ fn borrow_shield_block(shield: &impl Shield) {
 
 // NOTE: Rust threads, the built-in implementation is 1 Rust Thread :1 Thread in OS
 fn sample_multi_threading() {
-    let sub_thread = thread::spawn(|| {
-        println!("Message from sub_thread")
-    });
+    let sub_thread = thread::spawn(|| println!("Message from sub_thread"));
 
     println!("Message from main thread");
 
@@ -651,7 +655,6 @@ fn sample_share_data_between_threads() {
     // output: 2 Found: Fashion Sword
 }
 
-
 fn sample_update_share_data_in_threads() {
     // Note:
     // use std::sync::Mutex;
@@ -672,7 +675,7 @@ fn sample_update_share_data_in_threads() {
     for _ in 0..10 {
         let cash = Arc::clone(&cash);
         let handle = thread::spawn(move || {
-            let thread_id = thread::current(). id();
+            let thread_id = thread::current().id();
             let mut store_cash = cash.lock().unwrap();
             *store_cash += 10;
 
@@ -702,4 +705,163 @@ fn sample_update_share_data_in_threads() {
     // Thread ID: ThreadId(14), Cash: 190
     // Thread ID: ThreadId(13), Cash: 200
     // Total Cash: 200
+}
+
+fn sample_channels_for_thread_with_buffer_size() {
+    let items = vec![
+        "sword".to_string(),
+        "shield".to_string(),
+        "potion".to_string(),
+        "bow".to_string(),
+        "dagger".to_string(),
+        "gun".to_string(),
+        "hammer".to_string(),
+        "axe".to_string(),
+        "cloth".to_string(),
+    ];
+
+    // Note: sender is called Producer
+    let (sender, receiver): (mpsc::SyncSender<String>, mpsc::Receiver<String>) =
+        mpsc::sync_channel(items.len());
+    let sender_arc = Arc::new(sender);
+
+    for item in items.clone().into_iter() {
+        thread::spawn({
+            let thread_sender = Arc::clone(&sender_arc);
+            let item = item.clone();
+            move || {
+                thread_sender
+                    .send(format!("Worker {}: Task complete!", item))
+                    .unwrap();
+            }
+        });
+    }
+
+    // Note: sender is called Consumer
+    for _ in 0..items.len() {
+        let item = receiver.recv().unwrap();
+        println!("Received: {}", item);
+    }
+
+    // output: The order of the results depends on which thread finishes its task first.
+    // Received: Worker sword: Task complete!
+    // Received: Worker potion: Task complete!
+    // Received: Worker shield: Task complete!
+    // Received: Worker gun: Task complete!
+    // Received: Worker dagger: Task complete!
+    // Received: Worker bow: Task complete!
+    // Received: Worker axe: Task complete!
+    // Received: Worker hammer: Task complete!
+    // Received: Worker cloth: Task complete!
+}
+
+fn sample_channels_for_thread_without_buffer_size() {
+    let items = vec![
+        "sword".to_string(),
+        "shield".to_string(),
+        "potion".to_string(),
+        "bow".to_string(),
+        "dagger".to_string(),
+        "gun".to_string(),
+        "hammer".to_string(),
+        "axe".to_string(),
+        "cloth".to_string(),
+    ];
+
+    // producer
+    let (sender, receiver) = mpsc::channel();
+    let sender_arc = Arc::new(sender);
+
+    for item in items.clone().into_iter() {
+        thread::spawn({
+            let thread_sender = Arc::clone(&sender_arc);
+            let item = item.clone();
+            move || {
+                thread_sender
+                    .send(format!("Worker {}: Task complete!", item))
+                    .unwrap();
+            }
+        });
+    }
+
+    // Dropping all senders signals to the receiver that no more messages will be sent.
+    drop(sender_arc);
+
+    // consumer
+    while let Ok(item) = receiver.recv() {
+        println!("Received (without buffer size): {}", item)
+    }
+
+    // output: The order of the results depends on which thread finishes its task first.
+    // Received (without buffer size): Worker sword: Task complete!
+    // Received (without buffer size): Worker shield: Task complete!
+    // Received (without buffer size): Worker potion: Task complete!
+    // Received (without buffer size): Worker dagger: Task complete!
+    // Received (without buffer size): Worker bow: Task complete!
+    // Received (without buffer size): Worker gun: Task complete!
+    // Received (without buffer size): Worker hammer: Task complete!
+    // Received (without buffer size): Worker cloth: Task complete!
+    // Received (without buffer size): Worker axe: Task complete!
+}
+
+fn sample_channels_for_thread_with_update_shared_data() {
+    let loots_gold = vec![10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    let mut gold = 100;
+
+    let (sender, receiver): (
+        mpsc::SyncSender<(ThreadId, i32)>,
+        mpsc::Receiver<(ThreadId, i32)>,
+    ) = mpsc::sync_channel(3);
+    let sender_arc = Arc::new(sender);
+
+    for loot_gold in loots_gold.into_iter() {
+        thread::spawn({
+            let sender = Arc::clone(&sender_arc);
+            move || {
+                let data = (thread::current().id(), loot_gold);
+                sender.send(data).unwrap();
+            }
+        });
+    }
+
+    drop(sender_arc);
+
+    // for received in receiver {
+    //     let (thread_id, loot_gold) = received;
+    //     gold += loot_gold;
+    //     println!("Received from thread_id: {:?}, loot_gold: {}", thread_id, loot_gold);
+    // }
+
+    loop {
+        match receiver.recv() {
+            Ok((thread_id, loot_gold)) => {
+                gold += loot_gold;
+
+                println!(
+                    "Received from thread_id: {:?}, loot_gold: {}",
+                    thread_id, loot_gold
+                );
+            }
+            Err(_) => {
+                println!("All senders have been dropped");
+                break;
+            }
+        }
+    }
+
+    println!("gold: {}", gold);
+
+    // output:
+    // Received from thread_id: ThreadId(33), loot_gold: 10
+    // Received from thread_id: ThreadId(34), loot_gold: 20
+    // Received from thread_id: ThreadId(35), loot_gold: 30
+    // Received from thread_id: ThreadId(36), loot_gold: 40
+    // Received from thread_id: ThreadId(40), loot_gold: 80
+    // Received from thread_id: ThreadId(38), loot_gold: 60
+    // Received from thread_id: ThreadId(39), loot_gold: 70
+    // Received from thread_id: ThreadId(37), loot_gold: 50
+    // Received from thread_id: ThreadId(42), loot_gold: 100
+    // Received from thread_id: ThreadId(41), loot_gold: 90
+    // All senders have been dropped
+    // gold: 650
 }
