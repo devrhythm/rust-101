@@ -20,6 +20,7 @@ use rust_101::{potions, weapons};
 // use rust_101::shields::use_item::use_item;
 
 use rust_101::shields::use_item;
+use rust_101::basic_oop::characters::{Warrior, Mage, Healer, special_attack};
 
 // need to declare before use
 macro_rules! greeting_by_macro {
@@ -62,6 +63,7 @@ fn main() {
     greeting_by_macro!("World");
     magic_spelling!(fire);
     magic_spelling!(water);
+    sample_oop_basic();
 }
 
 fn sample_types() {
@@ -918,4 +920,22 @@ mod maps {
     pub fn use_item() {
         println!("Use a map");
     }
+}
+
+fn sample_oop_basic() {
+    let mut warrior = Warrior::new();
+    let mut mage = Mage::new();
+    let mut healer = Healer::new();
+
+    warrior.health_decrease(10);
+    mage.health_decrease(30);
+    healer.health_decrease(20);
+
+    println!("Warrior helath: {}", warrior.health);
+    println!("Mage helath: {}", mage.health);
+    println!("Healer helath: {}", healer.health);
+
+    special_attack(warrior.weapon);
+    special_attack(mage.weapon);
+    special_attack(healer.weapon);
 }
