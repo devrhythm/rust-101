@@ -1,3 +1,26 @@
-/target
+# Ignore target directories
+/console_app/target/
+/my_macro_lib/target/
+
+# Ignore Cargo.lock files
+/console_app/Cargo.lock
+/my_macro_lib/Cargo.lock
+
+# Ignore build artifacts
+/console_app/build/
+/my_macro_lib/build/
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.swo
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
 *.exe
 *.pdb
