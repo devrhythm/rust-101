@@ -22,6 +22,7 @@ use rust_101::{potions, weapons};
 use rust_101::basic_oop::characters::{
     health_decrease, health_increase, special_attack, Healer, Mage, Warrior,
 };
+use rust_101::basic_oop::quests::{Email, Pigeon, QuestManager, QuestNotifier};
 use rust_101::shields::use_item;
 
 // need to declare before use
@@ -66,6 +67,7 @@ fn main() {
     magic_spelling!(fire);
     magic_spelling!(water);
     sample_oop_basic();
+    sample_apply_solid_principle();
 }
 
 fn sample_types() {
@@ -948,4 +950,13 @@ fn sample_oop_basic() {
     special_attack(warrior.weapon);
     special_attack(mage.weapon);
     special_attack(healer.weapon);
+}
+
+fn sample_apply_solid_principle() {
+    let quest_manager = QuestManager;
+    let pigeon = Pigeon;
+    let email = Email;
+
+    quest_manager.complete_quest(pigeon);
+    quest_manager.complete_quest(email);
 }
