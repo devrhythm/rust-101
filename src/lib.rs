@@ -7,3 +7,5 @@ pub mod potions {
       println!("Drop a potion");
   }
 }
+
+pub mod weapons;
