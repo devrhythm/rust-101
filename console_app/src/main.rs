@@ -19,8 +19,10 @@ use rust_101::{potions, weapons};
 // `use_item` must be defined only once in the type namespace of this module
 // use rust_101::shields::use_item::use_item;
 
+use rust_101::basic_oop::characters::{
+    health_decrease, health_increase, special_attack, Healer, Mage, Warrior,
+};
 use rust_101::shields::use_item;
-use rust_101::basic_oop::characters::{Warrior, Mage, Healer, special_attack};
 
 // need to declare before use
 macro_rules! greeting_by_macro {
@@ -927,9 +929,17 @@ fn sample_oop_basic() {
     let mut mage = Mage::new();
     let mut healer = Healer::new();
 
-    warrior.health_decrease(10);
-    mage.health_decrease(30);
-    healer.health_decrease(20);
+    health_decrease(&mut warrior, 10);
+    health_decrease(&mut mage, 30);
+    health_decrease(&mut healer, 20);
+
+    println!("Warrior helath: {}", warrior.health);
+    println!("Mage helath: {}", mage.health);
+    println!("Healer helath: {}", healer.health);
+
+    health_increase(&mut warrior, 10);
+    health_increase(&mut mage, 10);
+    health_increase(&mut healer, 10);
 
     println!("Warrior helath: {}", warrior.health);
     println!("Mage helath: {}", mage.health);
