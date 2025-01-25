@@ -8,7 +8,7 @@ use std::thread::ThreadId;
 use std::vec;
 use std::{fmt, thread};
 
-use log_time::compute_time;
+use my_macro_lib::compute_time;
 use rust_101::armors::use_item::use_item;
 use rust_101::calculator::add::add;
 use rust_101::calculator_2::power::power;
@@ -38,8 +38,6 @@ macro_rules! magic_spelling {
 }
 
 // print compute time
-// sample code macro attribute
-// link: https://github.com/devrhythm/log_time
 #[compute_time]
 fn main() {
     sample_types();

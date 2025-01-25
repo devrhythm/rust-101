@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-log_time = "=0.1.0"
+my_macro_lib = { path = "../my_macro_lib" }
