@@ -12,3 +12,5 @@ pub mod weapons;
 pub mod armors;
 pub mod shields;
 pub mod pets;
+pub mod calculator;
+pub mod calculator_2;

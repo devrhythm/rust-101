@@ -9,6 +9,8 @@ use std::vec;
 use std::{fmt, thread};
 
 use rust_101::armors::use_item::use_item;
+use rust_101::calculator::add::add;
+use rust_101::calculator_2::power::power;
 use rust_101::pets::dogs::dog;
 use rust_101::potions::drop_item;
 use rust_101::{potions, weapons};
@@ -885,6 +887,9 @@ fn sample_modules_and_crates() {
     use_item();
     use_item::use_item();
     dog::bark();
+
+    println!("1 + 2 = {}", add(1, 2));
+    println!("2^3 = {}", power(2, 3));
 }
 
 mod maps {
