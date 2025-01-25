@@ -8,7 +8,8 @@ use std::thread::ThreadId;
 use std::vec;
 use std::{fmt, thread};
 
-use potions::drop_item;
+use rust_101::potions;
+use rust_101::potions::drop_item;
 
 
 fn main() {
@@ -875,16 +876,6 @@ fn sample_modules_and_crates() {
     weapons::use_item();
     maps::use_item();
     drop_item();
-}
-
-mod potions {
-    pub fn use_item() {
-        println!("Use a potion");
-    }
-
-    pub fn drop_item() {
-        println!("Drop a potion");
-    }
 }
 
 mod weapons {
