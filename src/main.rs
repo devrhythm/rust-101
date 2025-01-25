@@ -20,6 +20,22 @@ use rust_101::{potions, weapons};
 
 use rust_101::shields::use_item;
 
+// need to declare before use
+macro_rules! greeting_by_macro {
+    ($name:expr) => {
+        println!("Hello, {}", $name)
+    };
+}
+
+macro_rules! magic_spelling {
+    (fire) => {
+        println!("Fire");
+    };
+    (water) => {
+        println!("Water");
+    };
+}
+
 fn main() {
     sample_types();
     sample_string();
@@ -40,6 +56,9 @@ fn main() {
     sample_channels_for_thread_without_buffer_size();
     sample_channels_for_thread_with_update_shared_data();
     sample_modules_and_crates();
+    greeting_by_macro!("World");
+    magic_spelling!(fire);
+    magic_spelling!(water);
 }
 
 fn sample_types() {
